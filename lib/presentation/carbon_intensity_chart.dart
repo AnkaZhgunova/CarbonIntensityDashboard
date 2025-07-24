@@ -1,155 +1,133 @@
+import 'dart:math';
+
 import 'package:carbon_intensity_dashboard/data/models/carbon_intensity_model.dart';
-import 'package:carbon_intensity_dashboard/styles/colors.dart';
-import 'package:carbon_intensity_dashboard/styles/text.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../styles/colors.dart';
+import '../styles/text.dart';
+
 class CarbonIntensityChart extends StatelessWidget {
   final List<HalfHourlyIntensity> intensities;
+  const CarbonIntensityChart({
+    required this.intensities,
+    super.key,
+  });
 
-  const CarbonIntensityChart({super.key, required this.intensities});
-
-  Widget _leftTitleWidgets(double value, TitleMeta meta) {
-    if (value % 20 == 0 && value == 0) return const SizedBox.shrink();
-    if (value % 20 == 0) {
-      return SideTitleWidget(
-        axisSide: meta.axisSide,
-        space: 10,
-        child: Text(value.toInt().toString(),
-            style: AppTextStyle.black10Medium500),
-      );
-    } else {
-      return const SizedBox.shrink();
-    }
-  }
-
-  Widget _bottomTitleWidgets(double value, TitleMeta meta) {
-    final index = value.toInt();
-
-    if (index == 0) {
-      return SideTitleWidget(
-        axisSide: meta.axisSide,
-        space: 5,
-        child: Text(
-          DateFormat('HH:mm').format(intensities.first.time),
-          style: AppTextStyle.black10Medium500,
-        ),
-      );
-    } else if (index == intensities.length - 1) {
-      return SideTitleWidget(
-        axisSide: meta.axisSide,
-        space: 5,
-        child: Text(
-          DateFormat('HH:mm').format(intensities.last.time),
-          style: AppTextStyle.black10Medium500,
-        ),
-      );
-    }
-
-    return const SizedBox.shrink();
+  Color getBarColor(double intensity) {
+    if (intensity <= 100) return AppColors.mainGreen;
+    if (intensity <= 200) return AppColors.mainYellow;
+    if (intensity <= 300) return AppColors.mainCoral;
+    return AppColors.mainTextColor;
   }
 
   @override
   Widget build(BuildContext context) {
-    return LineChart(
-      LineChartData(
-        gridData: FlGridData(
-          show: true,
-          horizontalInterval: 20,
-          verticalInterval: 1,
-          drawHorizontalLine: true,
-          drawVerticalLine: true,
-          getDrawingHorizontalLine: (value) => FlLine(
-            color: AppColors.steel.withOpacity(0.3),
-            strokeWidth: 1,
-          ),
-          getDrawingVerticalLine: (value) => FlLine(
-            color: AppColors.steel.withOpacity(0.3),
-            strokeWidth: 1,
-          ),
-        ),
-        borderData: FlBorderData(
-          show: true,
-          border: Border.all(color: AppColors.steel, width: 1),
-        ),
-        titlesData: FlTitlesData(
-          topTitles: const AxisTitles(
-            sideTitles: SideTitles(
-              showTitles: false,
-            ),
-          ),
-          rightTitles: AxisTitles(
-            sideTitles: SideTitles(
-              showTitles: true,
-              reservedSize: 25,
-              getTitlesWidget: (double value, TitleMeta meta) {
-                return SideTitleWidget(
-                  axisSide: meta.axisSide,
-                  child: const SizedBox(),
-                );
-              },
-            ),
-          ),
-          bottomTitles: AxisTitles(
-            sideTitles: SideTitles(
-              showTitles: true,
-              reservedSize: 22,
-              getTitlesWidget: _bottomTitleWidgets,
-            ),
-          ),
-          leftTitles: AxisTitles(
-            sideTitles: SideTitles(
-              showTitles: true,
-              reservedSize: 40,
-              interval: 20,
-              getTitlesWidget: _leftTitleWidgets,
-            ),
-          ),
-        ),
-        lineBarsData: [
-          LineChartBarData(
-            spots: intensities
-                .asMap()
-                .entries
-                .map(
-                  (entry) => FlSpot(
-                    entry.key.toDouble(),
-                    entry.value.intensity.toDouble(),
-                  ),
-                )
-                .toList(),
-            isCurved: true,
-            color: AppColors.steel,
-            barWidth: 2,
-            dotData: FlDotData(
-              show: true,
-              getDotPainter: (spot, percent, barData, index) {
-                return FlDotCirclePainter(
-                  radius: 2,
-                  color: Colors.white,
-                  strokeWidth: 2,
-                  strokeColor: AppColors.steel,
-                );
-              },
-              checkToShowDot: (spot, barData) =>
-                  spot.x == intensities.length - 1,
-            ),
-            belowBarData: BarAreaData(
-              show: true,
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  AppColors.steel.withOpacity(0.3),
-                  AppColors.steel.withOpacity(0.0),
-                ],
+    final maxY = (intensities.map((e) => e.intensity).reduce(max).toDouble());
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final chartWidth = constraints.maxWidth;
+        final labelInterval = (chartWidth / 50).floor();
+
+        Widget bottomTitleWidgets(double value, TitleMeta meta) {
+          final index = value.toInt();
+          if (index % labelInterval == 0 ||
+              index == intensities.length - 1 ||
+              index == 0) {
+            return SideTitleWidget(
+              axisSide: meta.axisSide,
+              space: 6,
+              child: Text(
+                DateFormat('ha').format(intensities[index].time),
+                style: AppTextStyle.black10Medium500,
               ),
-            ),
+            );
+          }
+          return const SizedBox.shrink();
+        }
+
+        Widget rightTitleWidgets(double value, TitleMeta meta) {
+          return Text(
+            '${value.toInt()}',
+            style: AppTextStyle.black10Medium500,
+            textAlign: TextAlign.right,
+          );
+        }
+
+        return Container(
+          padding: const EdgeInsets.all(10),
+          margin: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8),
           ),
-        ],
-        lineTouchData: const LineTouchData(enabled: false),
-      ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('kCO₂', style: AppTextStyle.black16Medium500),
+              const SizedBox(height: 4),
+              Expanded(
+                child: BarChart(
+                  BarChartData(
+                    maxY: maxY,
+                    alignment: BarChartAlignment.spaceBetween,
+                    titlesData: FlTitlesData(
+                      show: true,
+                      leftTitles: const AxisTitles(
+                        sideTitles: SideTitles(showTitles: false),
+                      ),
+                      rightTitles: AxisTitles(
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          interval: maxY > 100 ? 100 : maxY / 2,
+                          reservedSize: 22,
+                          getTitlesWidget: rightTitleWidgets,
+                        ),
+                      ),
+                      topTitles: const AxisTitles(
+                        sideTitles: SideTitles(showTitles: false),
+                      ),
+                      bottomTitles: AxisTitles(
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          reservedSize: 20,
+                          getTitlesWidget: bottomTitleWidgets,
+                        ),
+                      ),
+                    ),
+                    gridData: FlGridData(
+                      show: true,
+                      drawVerticalLine: false,
+                      getDrawingHorizontalLine: (value) => FlLine(
+                        color: AppColors.mainTextColor,
+                        strokeWidth: 0.1,
+                      ),
+                    ),
+                    borderData: FlBorderData(show: false),
+                    barGroups: intensities.asMap().entries.map((entry) {
+                      final index = entry.key;
+                      final data = entry.value;
+                      return BarChartGroupData(
+                        x: index,
+                        barRods: [
+                          BarChartRodData(
+                            toY: data.intensity.toDouble(),
+                            color: getBarColor(data.intensity.toDouble()),
+                            width: 5,
+                            borderRadius: BorderRadius.zero,
+                          ),
+                        ],
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

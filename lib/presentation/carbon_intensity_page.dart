@@ -15,7 +15,7 @@ class CarbonIntensityPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.darkGray,
+      backgroundColor: AppColors.appBackground,
       body: SafeArea(
         child: BlocProvider(
           create: (_) => CarbonIntensityBloc(CarbonIntensityApi())
@@ -30,8 +30,8 @@ class CarbonIntensityPage extends StatelessWidget {
                   children: [
                     const SizedBox(height: 10),
                     Text(
-                      'Current Carbon Intensity',
-                      style: AppTextStyle.black24Medium500,
+                      'Current National Carbon Intensity',
+                      style: AppTextStyle.black20Medium500,
                     ),
                     const SizedBox(height: 10),
                     Container(
@@ -39,24 +39,24 @@ class CarbonIntensityPage extends StatelessWidget {
                       padding: const EdgeInsets.all(10),
                       margin: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: AppColors.black,
+                        color: Colors.white,
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Table(
                         columnWidths: const {
-                          0: FlexColumnWidth(0.55),
-                          1: FlexColumnWidth(0.05),
+                          0: FlexColumnWidth(2),
+                          1: FlexColumnWidth(0.1),
                         },
                         children: [
                           TableRow(
                             children: [
                               Text(
-                                'Forecast:',
+                                'Today:',
                                 style: AppTextStyle.black16Medium500,
                               ),
                               const SizedBox(),
                               Text(
-                                '${state.current.forecast} gCO2/kWh',
+                                '${state.currentDay.actual} kCO₂',
                                 style: AppTextStyle.black16Medium500,
                               ),
                             ],
@@ -77,12 +77,12 @@ class CarbonIntensityPage extends StatelessWidget {
                           TableRow(
                             children: [
                               Text(
-                                'Actual:',
+                                'For the last half an hour:',
                                 style: AppTextStyle.black16Medium500,
                               ),
                               const SizedBox(),
                               Text(
-                                '${state.current.actual} gCO2/kWh',
+                                '${state.currentHalfAnHour.actual} kCO₂',
                                 style: AppTextStyle.black16Medium500,
                               ),
                             ],
@@ -93,9 +93,9 @@ class CarbonIntensityPage extends StatelessWidget {
                     const SizedBox(height: 10),
                     Text(
                       'Half-Hourly Carbon Intensity',
-                      style: AppTextStyle.black24Medium500,
+                      style: AppTextStyle.black20Medium500,
                     ),
-                    const SizedBox(height: 30),
+                    const SizedBox(height: 10),
                     AspectRatio(
                       aspectRatio: 1,
                       child: CarbonIntensityChart(

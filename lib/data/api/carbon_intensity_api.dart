@@ -27,4 +27,22 @@ class CarbonIntensityApi {
       throw Exception('Failed to load daily carbon intensities');
     }
   }
+
+  Future<CarbonIntensity> getCurrentDayIntensity() async {
+    final now = DateTime.now();
+    final formattedDate = '${now.year.toString().padLeft(4, '0')}-'
+        '${now.month.toString().padLeft(2, '0')}-'
+        '${now.day.toString().padLeft(2, '0')}';
+
+    final response = await _dio.get('/intensity/date/$formattedDate');
+
+    if (response.statusCode == 200 &&
+        response.data['data'] != null &&
+        response.data['data'].isNotEmpty) {
+      final intensityData = response.data['data'][0];
+      return CarbonIntensity.fromJson(intensityData);
+    } else {
+      throw Exception('Failed to load current day intensity');
+    }
+  }
 }

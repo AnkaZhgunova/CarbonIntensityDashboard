@@ -1,12 +1,10 @@
 class CarbonIntensity {
-  final int forecast;
   final int actual;
 
-  CarbonIntensity({required this.forecast, required this.actual});
+  CarbonIntensity({required this.actual});
 
   factory CarbonIntensity.fromJson(Map<String, dynamic> json) {
     return CarbonIntensity(
-      forecast: json['intensity']['forecast'] ?? 0,
       actual: json['intensity']['actual'] ?? 0,
     );
   }

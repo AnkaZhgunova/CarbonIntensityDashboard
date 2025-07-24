@@ -7,10 +7,15 @@ class CarbonIntensityInitialState extends CarbonIntensityState {}
 class CarbonIntensityLoadingState extends CarbonIntensityState {}
 
 class CarbonIntensityLoadedState extends CarbonIntensityState {
-  final CarbonIntensity current;
+  final CarbonIntensity currentHalfAnHour;
+  final CarbonIntensity currentDay;
   final List<HalfHourlyIntensity> dailyIntensities;
 
-  CarbonIntensityLoadedState(this.current, this.dailyIntensities);
+  CarbonIntensityLoadedState({
+    required this.currentHalfAnHour,
+    required this.currentDay,
+    required this.dailyIntensities,
+  });
 }
 
 class CarbonIntensityErrorState extends CarbonIntensityState {
