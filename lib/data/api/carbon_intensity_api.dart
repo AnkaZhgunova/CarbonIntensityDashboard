@@ -2,11 +2,10 @@ import 'package:carbon_intensity_dashboard/data/models/carbon_intensity_model.da
 import 'package:dio/dio.dart';
 
 class CarbonIntensityApi {
-  final Dio _dio =
-      Dio(BaseOptions(baseUrl: 'https://api.carbonintensity.org.uk'));
-
+  final Dio dio;
+  CarbonIntensityApi(this.dio);
   Future<CarbonIntensity> getCurrentIntensity() async {
-    final response = await _dio.get('/intensity');
+    final response = await dio.get('/intensity');
     if (response.statusCode == 200 &&
         response.data['data'] != null &&
         response.data['data'].isNotEmpty) {
@@ -18,7 +17,7 @@ class CarbonIntensityApi {
   }
 
   Future<List<HalfHourlyIntensity>> getDailyIntensities() async {
-    final response = await _dio.get('/intensity/date');
+    final response = await dio.get('/intensity/date');
     if (response.statusCode == 200 && response.data['data'] is List) {
       return (response.data['data'] as List)
           .map((item) => HalfHourlyIntensity.fromJson(item))
@@ -34,7 +33,7 @@ class CarbonIntensityApi {
         '${now.month.toString().padLeft(2, '0')}-'
         '${now.day.toString().padLeft(2, '0')}';
 
-    final response = await _dio.get('/intensity/date/$formattedDate');
+    final response = await dio.get('/intensity/date/$formattedDate');
 
     if (response.statusCode == 200 &&
         response.data['data'] != null &&
