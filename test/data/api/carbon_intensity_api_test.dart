@@ -36,7 +36,7 @@ void main() {
 
     test('throws when response has no data', () async {
       when(() => mockDio.get(any())).thenAnswer(
-            (_) async => Response(
+        (_) async => Response(
           data: {
             'data': null,
           },
